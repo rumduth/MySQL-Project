@@ -68,7 +68,53 @@ INSERT INTO reviews(series_id, reviewer_id, rating) VALUES
 
 
 -- Print out the title and its average-rating for each movie
-SELECT title, AVG(rating) FROM reviews
+SELECT title, AVG(rating) as avg_rating FROM reviews
 INNER JOIN series 
 ON series.id = reviews.series_id
-GROUP BY title;
+GROUP BY title
+ORDER BY avg_rating;
+
+-- PRint out all ratings of each movie
+SELECT title, rating FROM reviews
+INNER JOIN series
+ON series.id = reviews.series_id
+ORDER BY title;
+
+-- Print out first_name, last_name and rating of each reviwer
+SELECT first_name, last_name, rating FROM reviews
+INNER JOIN reviewers
+ON reviews.reviewer_id = reviewers.id;
+
+-- Print out series which does not have any review
+SELECT title AS unreviewed_series FROM series
+LEFT JOIN reviews
+ON series.id = reviews.series_id
+WHERE reviews.reviewer_id IS NULL;
+
+
+-- Print out the averating rating for each genre
+SELECT genre, AVG(rating) FROM series
+JOIN reviews ON series.id = reviews.series_id
+GROUP BY genre;
+
+-- Print out information of each reviewers
+SELECT first_name, last_name, 
+	 SUM(CASE WHEN rating IS NULL THEN 0 ELSE 1 END) AS COUNT,
+	 IFNULL(MIN(rating),0) AS MIN,
+     IFNULL(MAX(rating),0) AS MAX,
+	 IFNULL(AVG(rating),0) AS AVG,
+CASE
+	WHEN AVG(rating) > 0 THEN "ACTIVE"
+    ELSE "INACTIVE"
+END AS STATUS
+FROM reviewers
+LEFT JOIN reviews
+ON reviewers.id = reviews.reviewer_id
+GROUP BY first_name, last_name;
+
+
+-- Print title, ratiting and reviewers
+SELECT title, rating, CONCAT(first_name,' ',last_name) AS reviewer FROM reviews
+JOIN reviewers ON reviewers.id = reviews.reviewer_id
+JOIN series ON series.id = reviews.series_id
+ORDER BY title;
